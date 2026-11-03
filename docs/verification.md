@@ -46,11 +46,17 @@
 - 演示环境中新增书签、待办及搜索打开详情通过；未写入真实 Supabase 数据。
 - TypeScript、生产构建与格式检查通过；生产构建仍提示部分 JS 包超过 500 kB。
 
-## 上线前剩余事项
+## 书签迁移与上线配置（2026-11-04）
 
-- 验收时公开注册仍开启，需关闭 `Allow new users to sign up`，保留已创建账号。
-- Turnstile 域名、挑战及 Supabase 服务端校验。
-- 主动退出与重新登录、真实多设备使用的补充验收。
-- GitHub Actions 首次运行和实际 Pages 域名访问。
+- 从 tabzero 导入 113 条书签、10 个分组，保留顺序，并将常用组的 10 条书签设为常用；逐条读取核对一致。
+- Supabase 公开注册已关闭，Site URL 已更新为 `https://calvinxx.github.io/sinan/`。
+- Turnstile 使用托管模式，允许 `calvinxx.github.io`、`localhost` 和 `127.0.0.1`；Supabase CAPTCHA 服务商和 secret 已保存，重新加载管理页确认启用。
+- GitHub 仓库和 Pages 使用 GitHub Actions；前端公开配置保存为 Repository variables，本地配置与迁移备份均未提交。
+- [首次发布工作流](https://github.com/calvinxx/sinan/actions/runs/41684886513) 成功：16 项测试、生产构建和 Pages 部署均通过。
+- 正式站点 HTML、JS、CSS 返回 HTTP 200，线上 Supabase 地址和 Turnstile site key 与配置一致；浏览器显示 PIN 登录页，Turnstile 自动验证成功后登录按钮可用。
+
+## 后续补充验收
+
+- 由用户在正式站点输入 PIN，补充检查登录、退出、重新登录和多设备使用；没有读取或代填用户 PIN。
 
 演示数据没有上传到真实项目。启动与配置步骤见 [README](../README.md)。

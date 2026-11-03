@@ -4,6 +4,8 @@
 
 React + TypeScript + Vite，使用 shadcn/ui、Tailwind CSS 和少量 Motion。前端部署到 GitHub Pages，账号与数据由 Supabase 管理。
 
+线上地址：[calvinxx.github.io/sinan](https://calvinxx.github.io/sinan/)。
+
 ## 本地运行
 
 运行时版本集中维护在 `mise.toml`，依赖版本由 `package-lock.json` 锁定。
@@ -95,7 +97,7 @@ Project URL 与 publishable key 可从项目 Connect 面板取得。这里所有
 
 工作流会安装锁定依赖、运行测试、检查类型、构建并发布 `dist`。变量变更后需要重新运行构建。将 Supabase Auth 的 Site URL 设置为实际 Pages URL，并确保 Turnstile 允许对应域名。[Vite Pages 部署说明](https://vite.dev/guide/static-deploy.html#github-pages)
 
-部署后验收：登录 → 新建书签与待办 → 刷新确认数据保留 → 退出确认不能读取私人数据。首次登录看到空工作台属于正常情况，演示数据不会上传到真实项目。
+部署后验收：登录 → 新建书签与待办 → 刷新确认数据保留 → 退出确认不能读取私人数据。新 Supabase 项目初始为空工作台，演示数据不会上传到真实项目。
 
 ## 实现边界
 
