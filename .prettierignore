@@ -1,0 +1,6 @@
+node_modules
+dist
+.qa
+.taste-skill
+package-lock.json
+docs/workbench-design.md
