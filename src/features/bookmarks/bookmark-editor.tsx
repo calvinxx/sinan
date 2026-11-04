@@ -24,6 +24,7 @@ import { useEditor, submitShortcut } from '@/hooks/use-editor'
 import { saveBookmark } from '@/lib/repository'
 import { bookmarkSchema, domainOf, errorMessage, normalizeUrl } from '@/lib/validation'
 import type { Bookmark, BookmarkGroup, BookmarkInput } from '@/lib/types'
+import { GroupManager } from './group-manager'
 
 export function BookmarkEditor({
   record,
@@ -46,16 +47,17 @@ export function BookmarkEditor({
     ? {
         title: record.title,
         url: record.url,
-        group_id: record.group_id,
+        group_id: record.group_id ?? '',
         is_pinned: record.is_pinned,
       }
-    : { title: initialTitle, url: '', group_id: null, is_pinned: false }
+    : { title: initialTitle, url: '', group_id: '', is_pinned: false }
   const editor = useEditor(owner, 'bookmark', record, initial, onClose)
   const { values, setValues } = editor
   const [pending, setPending] = useState(false)
   const [error, setError] = useState('')
   const [invalid, setInvalid] = useState<string>('')
   const [duplicate, setDuplicate] = useState<BookmarkInput | null>(null)
+  const [managingGroups, setManagingGroups] = useState(false)
   async function persist(input: BookmarkInput) {
     setPending(true)
     setError('')
@@ -78,6 +80,11 @@ export function BookmarkEditor({
     if (!parsed.success) {
       setInvalid(String(parsed.error.issues[0].path[0]))
       setError(parsed.error.issues[0].message)
+      return
+    }
+    if (!groups.some((g) => g.id === parsed.data.group_id)) {
+      setInvalid('group_id')
+      setError('分组不存在，请重新选择')
       return
     }
     setInvalid('')
@@ -105,7 +112,7 @@ export function BookmarkEditor({
           <DialogHeader>
             <DialogTitle>{record ? '编辑书签' : '添加书签'}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={submit} onKeyDown={submitShortcut} className="editor-form">
+          <form noValidate onSubmit={submit} onKeyDown={submitShortcut} className="editor-form">
             <FieldGroup>
               <Field data-invalid={invalid === 'url'}>
                 <FieldLabel htmlFor="bookmark-url">网址</FieldLabel>
@@ -137,18 +144,24 @@ export function BookmarkEditor({
                   onChange={(e) => setValues({ ...values, title: e.target.value })}
                 />
               </Field>
-              <Field>
+              <Field data-invalid={invalid === 'group_id'}>
                 <FieldLabel htmlFor="bookmark-group">分组</FieldLabel>
                 <Select
-                  value={values.group_id ?? 'none'}
-                  onValueChange={(v) => setValues({ ...values, group_id: v === 'none' ? null : v })}
+                  required
+                  disabled={!groups.length}
+                  value={groups.some((g) => g.id === values.group_id) ? values.group_id : ''}
+                  onValueChange={(v) => setValues({ ...values, group_id: v })}
                 >
-                  <SelectTrigger id="bookmark-group" className="w-full">
-                    <SelectValue />
+                  <SelectTrigger
+                    id="bookmark-group"
+                    className="w-full"
+                    aria-invalid={invalid === 'group_id'}
+                    aria-describedby={invalid === 'group_id' ? 'bookmark-error' : undefined}
+                  >
+                    <SelectValue placeholder="请选择分组" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="none">未分组</SelectItem>
                       {groups.map((g) => (
                         <SelectItem key={g.id} value={g.id}>
                           {g.name}
@@ -157,6 +170,11 @@ export function BookmarkEditor({
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                {!groups.length ? (
+                  <Button type="button" variant="outline" onClick={() => setManagingGroups(true)}>
+                    创建分组
+                  </Button>
+                ) : null}
               </Field>
               <Field orientation="horizontal">
                 <Checkbox
@@ -167,7 +185,7 @@ export function BookmarkEditor({
                 <FieldLabel htmlFor="bookmark-pinned">放入常用书签</FieldLabel>
               </Field>
             </FieldGroup>
-            {error ? <FieldError>{error}</FieldError> : null}
+            {error ? <FieldError id="bookmark-error">{error}</FieldError> : null}
             <DialogFooter>
               <Button
                 type="button"
@@ -184,6 +202,14 @@ export function BookmarkEditor({
           </form>
         </DialogContent>
       </Dialog>
+      {managingGroups ? (
+        <GroupManager
+          groups={groups}
+          bookmarks={bookmarks}
+          onClose={() => setManagingGroups(false)}
+          onSaved={onSaved}
+        />
+      ) : null}
       <ConfirmDialog
         open={editor.discard}
         onOpenChange={editor.setDiscard}

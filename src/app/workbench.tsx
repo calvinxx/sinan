@@ -214,7 +214,7 @@ export default function Workbench({
           <BookmarkSection
             bookmarks={bookmarks}
             groups={groups}
-            loading={data.bookmarks.isPending}
+            loading={data.bookmarks.isPending || data.groups.isPending}
             error={data.bookmarks.isError}
             groupsError={data.groups.isError}
             onRefresh={data.refresh}

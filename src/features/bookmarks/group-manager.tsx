@@ -122,7 +122,13 @@ export function GroupManager({
                     variant="ghost"
                     aria-label={`删除分组${g.name}`}
                     disabled={pending}
-                    onClick={() => setDeleting(g)}
+                    onClick={() => {
+                      if (bookmarks.some((b) => b.group_id === g.id)) {
+                        toast.error('请先移走分组中的书签，再删除分组')
+                        return
+                      }
+                      setDeleting(g)
+                    }}
                   >
                     <Trash2 />
                   </Button>
@@ -181,7 +187,7 @@ export function GroupManager({
           if (!open) setDeleting(null)
         }}
         title="删除这个分组？"
-        description={`其中的 ${bookmarks.filter((b) => b.group_id === deleting?.id).length} 个书签会移到「未分组」，书签内容会保留。`}
+        description={`「${deleting?.name}」将被删除。`}
         onConfirm={async () => {
           if (deleting) {
             await deleteRecord('bookmark_groups', deleting)
@@ -190,7 +196,7 @@ export function GroupManager({
               setEditing(undefined)
               setName('')
             }
-            toast.success('分组已删除，书签已保留')
+            toast.success('分组已删除')
           }
         }}
       />

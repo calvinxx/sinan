@@ -26,7 +26,7 @@ export const bookmarkSchema = z.object({
       return z.NEVER
     }
   }),
-  group_id: z.string().nullable(),
+  group_id: z.string({ error: '请选择分组' }).trim().min(1, '请选择分组'),
   is_pinned: z.boolean(),
 })
 export const todoSchema = z.object({

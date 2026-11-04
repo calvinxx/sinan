@@ -1,12 +1,13 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { PGlite } from '@electric-sql/pglite'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 
 const db = new PGlite()
 const alice = '00000000-0000-0000-0000-000000000001'
 const bob = '00000000-0000-0000-0000-000000000002'
 const groupA = '10000000-0000-0000-0000-000000000001'
 const groupB = '10000000-0000-0000-0000-000000000002'
+const emptyGroup = '10000000-0000-0000-0000-000000000003'
 const bookmarkA = '20000000-0000-0000-0000-000000000001'
 const bookmarkB = '20000000-0000-0000-0000-000000000002'
 
@@ -27,22 +28,22 @@ beforeAll(async () => {
     grant usage on schema auth to authenticated, anon;
     grant execute on function auth.uid() to authenticated, anon;
   `)
-  await db.exec(
-    readFileSync(
-      new URL('../../supabase/migrations/202611040001_initial.sql', import.meta.url),
-      'utf8',
-    ),
-  )
+  const migrations = new URL('../../supabase/migrations/', import.meta.url)
+  for (const file of readdirSync(migrations)
+    .filter((name) => name.endsWith('.sql'))
+    .sort()) {
+    await db.exec(readFileSync(new URL(file, migrations), 'utf8'))
+  }
   await db.query('insert into auth.users(id) values ($1), ($2)', [alice, bob])
 }, 30_000)
 beforeEach(async () => {
   await db.exec('begin')
   await db.query(
-    'insert into public.bookmark_groups(id,owner_id,name,sort_order) values ($1,$2,$3,0),($4,$5,$6,1)',
-    [groupA, alice, '开发', groupB, bob, '私人'],
+    'insert into public.bookmark_groups(id,owner_id,name,sort_order) values ($1,$2,$3,0),($4,$5,$6,1),($7,$2,$8,2)',
+    [groupA, alice, '开发', groupB, bob, '私人', emptyGroup, '空分组'],
   )
   await db.query(
-    'insert into public.bookmarks(id,owner_id,title,url,group_id,sort_order) values ($1,$2,$3,$4,$5,0),($6,$2,$7,$8,null,1)',
+    'insert into public.bookmarks(id,owner_id,title,url,group_id,sort_order) values ($1,$2,$3,$4,$5,0),($6,$2,$7,$8,$5,1)',
     [
       bookmarkA,
       alice,
@@ -86,16 +87,53 @@ describe('Supabase 迁移及访问控制', () => {
       db.query('update public.bookmarks set group_id = $1 where id = $2', [groupB, bookmarkA]),
     ).rejects.toThrow(/foreign key/)
   })
-  it('删除分组会原子保留书签并移动至未分组', async () => {
+  it('有书签的分组不能删除，书签及分组均保留', async () => {
     await asUser(alice)
+    await db.exec('savepoint deleting_group')
+    await expect(
+      db.query(
+        'select public.delete_bookmark_group(id,updated_at) from public.bookmark_groups where id = $1',
+        [groupA],
+      ),
+    ).rejects.toThrow('请先移走分组中的书签')
+    await db.exec('rollback to savepoint deleting_group')
+    expect(
+      (await db.query('select * from public.bookmarks where group_id = $1', [groupA])).rows,
+    ).toHaveLength(2)
+    expect(
+      (await db.query('select * from public.bookmark_groups where id = $1', [groupA])).rows,
+    ).toHaveLength(1)
+  })
+  it('移走书签后可以删除空分组', async () => {
+    await asUser(alice)
+    await db.query('update public.bookmarks set group_id = $1 where group_id = $2', [
+      emptyGroup,
+      groupA,
+    ])
     await db.query(
       'select public.delete_bookmark_group(id,updated_at) from public.bookmark_groups where id = $1',
       [groupA],
     )
     expect(
-      (await db.query('select group_id from public.bookmarks where id = $1', [bookmarkA])).rows,
-    ).toEqual([{ group_id: null }])
-    expect((await db.query('select * from public.bookmark_groups')).rows).toHaveLength(0)
+      (await db.query('select * from public.bookmarks where group_id = $1', [emptyGroup])).rows,
+    ).toHaveLength(2)
+    expect((await db.query('select * from public.bookmark_groups')).rows).toHaveLength(1)
+  })
+  it('不能新增没有分组的书签', async () => {
+    await asUser(alice)
+    await expect(
+      db.query('insert into public.bookmarks(owner_id,title,url) values ($1,$2,$3)', [
+        alice,
+        '缺少分组',
+        'https://example.com',
+      ]),
+    ).rejects.toThrow(/not-null constraint/)
+  })
+  it('不能清空已有书签的分组', async () => {
+    await asUser(alice)
+    await expect(
+      db.query('update public.bookmarks set group_id = null where id = $1', [bookmarkA]),
+    ).rejects.toThrow(/not-null constraint/)
   })
   it('排序事务交换顺序且更新版本', async () => {
     await asUser(alice)

@@ -3,7 +3,7 @@ export type BookmarkGroup = Entity & { name: string; sort_order: number }
 export type Bookmark = Entity & {
   title: string
   url: string
-  group_id: string | null
+  group_id: string
   is_pinned: boolean
   sort_order: number
   pinned_order: number | null

@@ -1,5 +1,6 @@
 import { createDemoData } from './demo'
 import { demoMode, supabase } from './supabase'
+import { bookmarkSchema } from './validation'
 import type { Bookmark, BookmarkInput, Resource, ResourceMap, Todo, TodoInput } from './types'
 
 const data = createDemoData()
@@ -80,10 +81,14 @@ async function save<K extends Resource>(
   return record as ResourceMap[K]
 }
 export async function saveBookmark(input: BookmarkInput, previous?: Bookmark): Promise<Bookmark> {
+  const parsed = bookmarkSchema.safeParse(input)
+  if (!parsed.success) throw new Error(parsed.error.issues[0].message)
+  if (demoMode && !data.bookmark_groups.some((g) => g.id === parsed.data.group_id))
+    throw new Error('分组不存在，请重新选择')
   return save(
     'bookmarks',
     {
-      ...input,
+      ...parsed.data,
       sort_order: previous?.sort_order ?? Date.now(),
       pinned_order: input.is_pinned ? (previous?.pinned_order ?? Date.now()) : null,
     },
@@ -112,13 +117,9 @@ export async function deleteRecord<K extends Resource>(resource: K, record: Reso
     const records = data[resource] as ResourceMap[K][]
     const index = records.findIndex((r) => r.id === record.id && r.updated_at === record.updated_at)
     if (index < 0) throw new Error(conflict)
+    if (resource === 'bookmark_groups' && data.bookmarks.some((b) => b.group_id === record.id))
+      throw new Error('请先移走分组中的书签，再删除分组')
     records.splice(index, 1)
-    if (resource === 'bookmark_groups')
-      data.bookmarks = data.bookmarks.map((b) =>
-        b.group_id === record.id
-          ? { ...b, group_id: null, updated_at: nextTimestamp(b.updated_at) }
-          : b,
-      )
     return
   }
   if (resource === 'bookmark_groups') {

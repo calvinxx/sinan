@@ -44,7 +44,7 @@
 常用书签                                 待处理  已完成
 GitHub    Supabase    邮箱                截止时间：全部     ＋
 
-全部  开发  设计  阅读                    逾期
+开发  设计  阅读                          逾期
                                          ○ 整理接口说明     昨天
 GitHub          github.com
 MDN             developer.mozilla.org    今天
@@ -120,11 +120,11 @@ Figma           figma.com                ◐ 确定首页布局     18:00
 
 ### 录入和组织
 
-新增书签包含标题、网址、分组和置顶选项。标题及网址必填，分组为空时归入「未分组」。
+新增书签包含标题、网址、分组和置顶选项。标题、网址和分组均必填。分组栏只展示实际分组，默认选中第一组，不设「全部」或「未分组」入口；没有分组时提供创建入口。
 
 网址缺少协议时补全 https，并在保存前展示规范化结果；只允许 http 和 https。相同规范化网址提示「已存在」，允许定位已有书签或明确选择继续保存，不静默覆盖。
 
-分组支持新增、重命名和删除。删除分组时展示受影响数量，确认后把书签移到「未分组」，保留书签内容。该操作在数据库事务中完成。
+分组支持新增、重命名和删除。只有空分组可以删除；有书签时提示先移走书签。数据库通过非空约束、外键和事务函数保证书签始终属于实际分组。
 
 首版通过菜单中的「上移／下移」调整分组和书签顺序，置顶区保存独立顺序。普通点击直接打开网址，编辑入口放在更多菜单中。单项删除需确认。
 
@@ -267,12 +267,12 @@ GitHub Pages 承载静态前端，Supabase 承担身份验证和数据读写。�
 | 表 | 业务字段 |
 | --- | --- |
 | bookmark_groups | name、sort_order |
-| bookmarks | title、url、group_id 可空、is_pinned、sort_order、pinned_order 可空 |
+| bookmarks | title、url、group_id 必填、is_pinned、sort_order、pinned_order 可空 |
 | todos | title、details、status、due_at 可空、completed_at 可空 |
 
 status 限制为 todo、doing、done；due_at 和 completed_at 使用 timestamptz。完成任务时填写 completed_at，恢复未完成时清空。标题、详情长度和状态一致性同时通过数据库约束保护。
 
-为 owner_id、书签分组与顺序、任务状态与截止时间建立适当索引。书签的 group_id 必须指向同一个 owner 的分组，通过包含 owner_id 的复合外键或等效数据库约束保证；删除分组和迁移书签必须原子执行。
+为 owner_id、书签分组与顺序、任务状态与截止时间建立适当索引。书签的 group_id 必须非空且指向同一个 owner 的分组，通过非空约束和包含 owner_id 的复合外键保证；删除分组时在事务内锁定分组并确认没有书签。
 
 ### 登录体验与实现
 

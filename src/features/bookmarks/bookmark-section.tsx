@@ -50,21 +50,16 @@ export function BookmarkSection({
   onGroups,
   disabled,
 }: Props) {
-  const [selection, setSelection] = useState('all')
+  const [selection, setSelection] = useState('')
   const [expanded, setExpanded] = useState(false)
   const [busy, setBusy] = useState(false)
   const [removing, setRemoving] = useState<Bookmark | null>(null)
-  const selected =
-    selection === 'all' || selection === 'none' || groups.some((g) => g.id === selection)
-      ? selection
-      : 'all'
+  const selected = groups.some((g) => g.id === selection) ? selection : (groups[0]?.id ?? '')
   const pinned = bookmarks
     .filter((b) => b.is_pinned)
     .sort((a, b) => (a.pinned_order ?? 0) - (b.pinned_order ?? 0))
   const visible = bookmarks
-    .filter(
-      (b) => selected === 'all' || (selected === 'none' ? !b.group_id : b.group_id === selected),
-    )
+    .filter((b) => b.group_id === selected)
     .sort((a, b) => a.sort_order - b.sort_order)
   async function action(fn: () => Promise<unknown>) {
     setBusy(true)
@@ -182,44 +177,51 @@ export function BookmarkSection({
             </Button>
           ) : null}
           {groupsError ? (
-            <LoadError title="分组加载失败，仍可查看全部书签" retry={() => void onRefresh()} />
-          ) : null}
-          <Tabs value={selected} onValueChange={setSelection} className="bookmark-tabs">
-            <div className="group-tabs-scroll">
-              <TabsList variant="line" aria-label="书签分组">
-                <TabsTrigger value="all">全部</TabsTrigger>
-                {groups.map((g) => (
-                  <TabsTrigger key={g.id} value={g.id}>
-                    {g.name}
-                  </TabsTrigger>
-                ))}
-                <TabsTrigger value="none">未分组</TabsTrigger>
-              </TabsList>
-            </div>
-            <TabsContent value={selected} tabIndex={-1}>
-              {visible.length ? (
-                <div className="bookmark-grid">
-                  {visible.map((b, i) => (
-                    <div className="bookmark-row" key={b.id}>
-                      <a href={b.url} target="_blank" rel="noopener noreferrer">
-                        <SiteIcon key={b.url} url={b.url} title={b.title} />
-                        <span className="bookmark-text">
-                          <span className="bookmark-name">{b.title}</span>
-                          {b.title.toLocaleLowerCase() !== domainOf(b.url).toLocaleLowerCase() ? (
-                            <span className="bookmark-domain">{domainOf(b.url)}</span>
-                          ) : null}
-                        </span>
-                        {b.is_pinned ? <Pin className="inline-pin" aria-label="常用书签" /> : null}
-                      </a>
-                      {menu(b, visible, i, false)}
-                    </div>
+            <LoadError title="分组加载失败" retry={() => void onRefresh()} />
+          ) : !groups.length ? (
+            <EmptyList
+              title="暂无分组"
+              action="创建分组"
+              onAction={disabled ? undefined : onGroups}
+            />
+          ) : (
+            <Tabs value={selected} onValueChange={setSelection} className="bookmark-tabs">
+              <div className="group-tabs-scroll">
+                <TabsList variant="line" aria-label="书签分组">
+                  {groups.map((g) => (
+                    <TabsTrigger key={g.id} value={g.id}>
+                      {g.name}
+                    </TabsTrigger>
                   ))}
-                </div>
-              ) : (
-                <EmptyList title={selected === 'all' ? '暂无书签' : '该分组暂无书签'} />
-              )}
-            </TabsContent>
-          </Tabs>
+                </TabsList>
+              </div>
+              <TabsContent value={selected} tabIndex={-1}>
+                {visible.length ? (
+                  <div className="bookmark-grid">
+                    {visible.map((b, i) => (
+                      <div className="bookmark-row" key={b.id}>
+                        <a href={b.url} target="_blank" rel="noopener noreferrer">
+                          <SiteIcon key={b.url} url={b.url} title={b.title} />
+                          <span className="bookmark-text">
+                            <span className="bookmark-name">{b.title}</span>
+                            {b.title.toLocaleLowerCase() !== domainOf(b.url).toLocaleLowerCase() ? (
+                              <span className="bookmark-domain">{domainOf(b.url)}</span>
+                            ) : null}
+                          </span>
+                          {b.is_pinned ? (
+                            <Pin className="inline-pin" aria-label="常用书签" />
+                          ) : null}
+                        </a>
+                        {menu(b, visible, i, false)}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyList title="该分组暂无书签" />
+                )}
+              </TabsContent>
+            </Tabs>
+          )}
         </>
       )}
       <ConfirmDialog

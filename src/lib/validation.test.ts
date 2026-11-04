@@ -20,8 +20,12 @@ describe('网址与表单边界', () => {
   })
   it('拒绝空标题和过长详情', () => {
     expect(
-      bookmarkSchema.safeParse({ title: '  ', url: 'github.com', group_id: null, is_pinned: false })
-        .success,
+      bookmarkSchema.safeParse({
+        title: '  ',
+        url: 'github.com',
+        group_id: 'demo-dev',
+        is_pinned: false,
+      }).success,
     ).toBe(false)
     expect(
       todoSchema.safeParse({
@@ -31,5 +35,25 @@ describe('网址与表单边界', () => {
         due_at: null,
       }).success,
     ).toBe(false)
+  })
+  it('书签必须选择分组', () => {
+    for (const group_id of [undefined, null, '', '   ']) {
+      const result = bookmarkSchema.safeParse({
+        title: 'GitHub',
+        url: 'github.com',
+        group_id,
+        is_pinned: false,
+      })
+      expect(result.success).toBe(false)
+      if (!result.success) expect(result.error.issues[0].message).toBe('请选择分组')
+    }
+    expect(
+      bookmarkSchema.safeParse({
+        title: 'GitHub',
+        url: 'github.com',
+        group_id: 'demo-dev',
+        is_pinned: false,
+      }).success,
+    ).toBe(true)
   })
 })
