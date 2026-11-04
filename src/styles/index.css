@@ -102,9 +102,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 32px;
-  padding: 24px 0;
-  border-bottom: 1px solid var(--border);
+  gap: 24px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--warm-rule);
 }
 .brand {
   display: flex;
@@ -119,10 +119,10 @@
   flex-shrink: 0;
 }
 .brand h1 {
-  font-size: 23px;
+  font-size: 24px;
   line-height: 1.2;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
 }
 .search-trigger {
   display: flex;
@@ -131,7 +131,7 @@
   width: 340px;
   margin-left: auto;
   margin-right: 16px;
-  height: 40px;
+  height: 36px;
   padding: 0 12px;
   background: var(--secondary);
   border: 1px solid transparent;
@@ -152,7 +152,7 @@
 }
 .header-actions {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
 }
 .day-line {
@@ -160,13 +160,14 @@
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  padding: 20px 0 24px;
+  padding: 16px 0 24px;
   color: var(--muted-foreground);
   font-size: 12px;
 }
 .day-line time {
   color: var(--foreground);
   font-size: 13px;
+  font-weight: 500;
 }
 .workspace-grid {
   display: grid;
@@ -185,10 +186,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 24px;
+  min-height: 36px;
+  margin-bottom: 20px;
 }
 .bookmark-section {
-  padding-top: 26px;
+  padding-top: 0;
 }
 .section-actions {
   display: flex;
@@ -197,16 +199,17 @@
 }
 .section-count {
   color: var(--muted-foreground);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
   font-variant-numeric: tabular-nums;
 }
 .section-heading h2 {
-  font-size: 18px;
+  font-size: 20px;
+  line-height: 1.4;
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
 }
 .pinned-grid {
   display: grid;
@@ -216,19 +219,24 @@
 }
 .pinned-item {
   position: relative;
-  border-radius: 10px;
-  background: var(--secondary);
-  transition: background-color 120ms;
+  border: 1px solid var(--warm-rule);
+  border-radius: 12px;
+  background: var(--card);
+  transition:
+    background-color 120ms,
+    border-color 120ms;
 }
 .pinned-item:hover {
   background: var(--accent);
+  border-color: var(--border);
 }
 .pinned-item > a {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 15px;
-  padding: 20px 18px 17px;
+  gap: 12px;
+  padding: 16px;
+  min-height: 96px;
   min-width: 0;
 }
 .pinned-item > a > span:not(.site-icon) {
@@ -239,7 +247,8 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow-wrap: anywhere;
-  font-size: 13px;
+  font-size: 14px;
+  line-height: 1.5;
   font-weight: 500;
 }
 .site-icon {
@@ -262,16 +271,16 @@
   object-fit: contain;
 }
 .pinned-item .site-icon {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
 }
 .pinned-item .site-icon img {
   width: 26px;
   height: 26px;
 }
 .pinned-arrow {
-  width: 13px;
-  height: 13px;
+  width: 12px;
+  height: 12px;
   position: absolute;
   right: 16px;
   bottom: 20px;
@@ -279,8 +288,8 @@
 }
 .pinned-item .bookmark-menu {
   position: absolute;
-  top: 5px;
-  right: 5px;
+  top: 4px;
+  right: 4px;
 }
 .bookmark-menu {
   opacity: 0;
@@ -297,7 +306,7 @@
 .group-tabs-scroll {
   overflow-x: auto;
   border-bottom: 1px solid var(--border);
-  padding-bottom: 5px;
+  padding-bottom: 4px;
   scrollbar-width: none;
 }
 /* Radix focuses tabs on pointer down, which also matches :focus-visible. */
@@ -307,7 +316,7 @@
   box-shadow: none;
 }
 .bookmark-tabs {
-  gap: 12px;
+  gap: 16px;
 }
 .bookmark-grid {
   display: grid;
@@ -366,20 +375,17 @@
   margin-left: auto;
 }
 .todo-section {
-  background: var(--card);
-  border: 1px solid var(--warm-rule);
-  border-radius: 12px;
-  padding: 25px 25px 18px;
+  padding: 0;
 }
 .todo-section .section-heading {
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 .todo-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--border);
-  padding-bottom: 5px;
+  padding-bottom: 4px;
 }
 .tab-count {
   font-size: 12px;
@@ -391,7 +397,7 @@
   gap: 0;
 }
 .todo-group {
-  margin-top: 23px;
+  margin-top: 24px;
 }
 .todo-group h3 {
   display: flex;
@@ -399,24 +405,26 @@
   gap: 8px;
   font-size: 12px;
   color: var(--muted-foreground);
-  font-weight: 400;
-  margin-bottom: 7px;
+  font-weight: 500;
+  margin-bottom: 4px;
 }
 .todo-row {
   display: flex;
-  align-items: flex-start;
-  gap: 9px;
-  min-height: 49px;
-  padding: 10px 0;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 12px 0;
   border-bottom: 1px solid var(--warm-rule);
 }
 .todo-row:last-child {
   border-bottom: none;
 }
 .todo-check {
-  padding: 2px 0;
-  width: 22px;
+  padding: 0;
+  width: 24px;
   min-height: 24px;
+  display: grid;
+  place-items: center;
   flex-shrink: 0;
   color: var(--muted-foreground);
 }
@@ -434,17 +442,25 @@
   flex: 1;
   text-align: left;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  line-height: 1.7;
-  padding-right: 4px;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 8px;
+  line-height: 1.6;
+  padding-right: 8px;
 }
 .todo-title-button > span {
+  min-width: 0;
   overflow-wrap: anywhere;
 }
 .todo-title-button small {
+  padding: 0 6px;
+  border-radius: 4px;
+  background: var(--accent);
   color: var(--primary);
-  font-size: 11px;
+  font-size: 12px;
+  line-height: 20px;
+  font-weight: 500;
+  flex-shrink: 0;
 }
 .todo-title-button:hover > span {
   color: var(--primary);
@@ -456,10 +472,12 @@
 .todo-date {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 4px;
+  min-width: 40px;
   white-space: nowrap;
   color: var(--muted-foreground);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 24px;
   font-variant-numeric: tabular-nums;
 }
@@ -473,9 +491,13 @@
   border-radius: 50%;
 }
 .quick-add-todo {
-  margin-top: 18px;
+  margin-top: 16px;
   width: 100%;
   justify-content: flex-start;
+  color: var(--muted-foreground);
+}
+.quick-add-todo:hover {
+  color: var(--foreground);
 }
 .active-filter {
   display: flex;
@@ -505,7 +527,6 @@
 .module-toggle button[aria-pressed='true'] {
   background: var(--background);
   color: var(--foreground);
-  box-shadow: 0 1px 3px #25282415;
 }
 .skip-link {
   position: fixed;
@@ -660,17 +681,11 @@
   margin-bottom: 36px;
 }
 @media (max-width: 1399px) {
-  .bookmark-section {
-    padding-top: 25px;
-  }
   .app-shell {
     margin: 0 40px;
   }
   .workspace-grid {
     gap: 32px;
-  }
-  .todo-section {
-    padding: 24px 20px 18px;
   }
 }
 @media (max-width: 1100px) {
@@ -688,7 +703,7 @@
     gap: 8px;
   }
   .pinned-item > a {
-    padding: 16px 12px;
+    padding: 16px;
   }
   .pinned-arrow {
     display: none;
@@ -717,11 +732,11 @@
     top: 0;
     z-index: 10;
     background: var(--background);
-    padding: 8px 0;
-    margin-bottom: 26px;
+    padding: 4px 0;
+    margin-bottom: 20px;
   }
   .day-line {
-    padding-bottom: 20px;
+    padding-bottom: 16px;
   }
   .bookmark-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -729,7 +744,7 @@
   .todo-section {
     max-width: 720px;
     margin: 0 auto;
-    padding: 24px;
+    padding: 0;
   }
   .bookmark-menu {
     opacity: 1;
@@ -740,7 +755,7 @@
     margin: 0 16px;
   }
   .topbar {
-    padding: 22px 0 20px;
+    padding: 16px 0;
     gap: 8px;
   }
   .brand {
@@ -769,36 +784,38 @@
     height: 20px;
   }
   .header-actions {
-    gap: 3px;
+    gap: 4px;
   }
   .header-actions > [data-variant='default'] {
-    padding: 0 10px;
+    padding: 0 12px;
   }
   .header-actions > [data-variant='default'] > svg:last-child {
     display: none;
   }
   .day-line {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-    font-size: 11px;
-    padding: 18px 0;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: 12px;
+    row-gap: 4px;
+    font-size: 12px;
+    padding: 12px 0 16px;
   }
   .mobile-switch {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
   }
   .section-heading {
-    margin-bottom: 18px;
+    margin-bottom: 16px;
   }
   .section-heading h2 {
-    font-size: 17px;
+    font-size: 20px;
   }
   .pinned-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    gap: 12px;
   }
   .pinned-item > a {
-    padding: 17px 16px;
+    padding: 16px;
     gap: 12px;
   }
   .pinned-arrow {
@@ -817,7 +834,7 @@
     opacity: 1;
   }
   .todo-section {
-    padding: 22px 16px 16px;
+    padding: 0;
   }
   .todo-check {
     width: 44px;
@@ -826,14 +843,15 @@
     place-items: center;
   }
   .todo-row {
-    gap: 5px;
+    gap: 8px;
     align-items: center;
-    padding: 5px 0;
+    padding: 8px 0;
     min-height: 56px;
   }
   .todo-title-button {
     min-height: 44px;
-    justify-content: center;
+    justify-content: flex-start;
+    align-items: center;
   }
   .todo-date {
     min-height: 44px;
