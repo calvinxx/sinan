@@ -17,6 +17,10 @@ export function Login() {
   async function submit(e: FormEvent) {
     e.preventDefault()
     if (pending || !supabase) return
+    if (captchaSiteKey && !token) {
+      setError('请先完成验证')
+      return
+    }
     if (!/^\d{8,64}$/.test(pin)) {
       setError('请输入至少 8 位数字 PIN')
       return
