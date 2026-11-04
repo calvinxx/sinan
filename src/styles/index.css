@@ -300,6 +300,10 @@
   padding-bottom: 5px;
   scrollbar-width: none;
 }
+/* Radix focuses tabs on pointer down, which also matches :focus-visible. */
+[data-slot='tabs-trigger'][data-pointer-focus]:focus-visible {
+  outline: none;
+}
 .bookmark-tabs {
   gap: 12px;
 }
