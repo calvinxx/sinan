@@ -30,27 +30,43 @@ export function Brand() {
   )
 }
 export function SiteIcon({ url, title }: { url: string; title: string }) {
-  const [failed, setFailed] = useState(false)
+  return <SiteIconImage key={url} url={url} title={title} />
+}
+function SiteIconImage({ url, title }: { url: string; title: string }) {
+  const [index, setIndex] = useState(0)
   const [loaded, setLoaded] = useState(false)
-  let src = ''
+  let candidates: string[] = []
   try {
     const parsed = new URL(url)
-    if (parsed.protocol === 'https:') src = `${parsed.origin}/favicon.ico`
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      parsed.protocol = 'https:'
+      candidates = [
+        `${parsed.origin}/apple-touch-icon.png`,
+        `${parsed.origin}/favicon.ico`,
+        `https://www.google.com/s2/favicons?domain=${encodeURIComponent(parsed.hostname)}&sz=128`,
+      ]
+    }
   } catch {
     /* 名称首字兜底 */
   }
+  const src = candidates[index]
   return (
     <span className="site-icon" aria-hidden="true">
-      {!loaded ? <span>{title.slice(0, 1).toUpperCase()}</span> : null}
-      {!failed && src ? (
+      {!loaded ? <span>{[...title][0]?.toUpperCase()}</span> : null}
+      {src ? (
         <img
+          key={src}
           src={src}
           alt=""
           loading="lazy"
+          decoding="async"
           referrerPolicy="no-referrer"
           style={{ opacity: loaded ? 1 : 0 }}
           onLoad={() => setLoaded(true)}
-          onError={() => setFailed(true)}
+          onError={() => {
+            setLoaded(false)
+            setIndex((value) => value + 1)
+          }}
         />
       ) : null}
     </span>

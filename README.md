@@ -105,7 +105,7 @@ Project URL 与 publishable key 可从项目 Connect 面板取得。这里所有
 - 业务数据与未提交草稿仅在内存中缓存。会话失效后，同一页面重新登录相同账号可恢复草稿；刷新页面不保留草稿。主动退出清理私人缓存。
 - localStorage 仅保存模块偏好与 Supabase 管理的 Auth 会话，不持久缓存书签和待办。
 - 断网时可以查看已加载内容，暂停写入；没有离线队列和后台提醒。
-- 网站 favicon 直接尝试目标网站的 `/favicon.ico`，失败后显示名称首字。
+- 网站图标依次尝试 `/apple-touch-icon.png`、`/favicon.ico`、Google 图标缓存，全部失败后显示名称首字。图标请求由浏览器发起并使用 HTTPS；Google 回退仅传递网站域名。
 - 数据库自动测试使用 PGlite 加模拟的 `auth.uid()`，覆盖 SQL 权限与事务逻辑；真实 Supabase 联调结果与上线前待办见 [验证记录](docs/verification.md)。
 
 设计依据见 [暖灰版设计与实现方案](docs/workbench-design.md)。
