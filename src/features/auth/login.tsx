@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useCallback, useState, type FormEvent } from 'react'
 import { ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { Brand } from '@/components/brand'
 import { Button } from '@/components/ui/button'
@@ -14,6 +14,11 @@ export function Login() {
   const [error, setError] = useState('')
   const [token, setToken] = useState('')
   const [attempt, setAttempt] = useState(0)
+  const verified = !captchaSiteKey || Boolean(token)
+  const handleToken = useCallback((value: string) => {
+    setToken(value)
+    if (!value) setVisible(false)
+  }, [])
   async function submit(e: FormEvent) {
     e.preventDefault()
     if (pending || !supabase) return
@@ -55,41 +60,49 @@ export function Login() {
       <div className="login-card">
         <Brand />
         <form onSubmit={submit} className="editor-form">
-          <FieldGroup>
-            <Field data-invalid={!!error}>
-              <FieldLabel htmlFor="pin">PIN</FieldLabel>
-              <div className="flex gap-2">
-                <Input
-                  id="pin"
-                  autoFocus
-                  type={visible ? 'text' : 'password'}
-                  inputMode="numeric"
-                  autoComplete="current-password"
-                  maxLength={64}
-                  value={pin}
-                  aria-invalid={!!error}
-                  onChange={(e) => setPin(e.target.value)}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  aria-label={visible ? '隐藏 PIN' : '显示 PIN'}
-                  onClick={() => setVisible(!visible)}
-                >
-                  {visible ? <EyeOff /> : <Eye />}
-                </Button>
-              </div>
-            </Field>
-          </FieldGroup>
           {captchaSiteKey ? (
-            <Turnstile key={attempt} siteKey={captchaSiteKey} onToken={setToken} />
+            // Keep the widget mounted so token expiration can return to verification.
+            <div hidden={verified}>
+              <Turnstile key={attempt} siteKey={captchaSiteKey} onToken={handleToken} />
+            </div>
           ) : null}
-          {error ? <FieldError>{error}</FieldError> : null}
-          <Button type="submit" disabled={pending || (Boolean(captchaSiteKey) && !token)}>
-            {pending ? '正在进入…' : '进入司南'}
-            <ArrowRight data-icon="inline-end" />
-          </Button>
+          {verified ? (
+            <FieldGroup>
+              <Field data-invalid={!!error}>
+                <FieldLabel htmlFor="pin">PIN</FieldLabel>
+                <div className="flex gap-2">
+                  <Input
+                    id="pin"
+                    autoFocus
+                    type={visible ? 'text' : 'password'}
+                    inputMode="numeric"
+                    autoComplete="current-password"
+                    maxLength={64}
+                    value={pin}
+                    aria-invalid={!!error}
+                    aria-describedby={error ? 'login-error' : undefined}
+                    onChange={(e) => setPin(e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-label={visible ? '隐藏 PIN' : '显示 PIN'}
+                    onClick={() => setVisible(!visible)}
+                  >
+                    {visible ? <EyeOff /> : <Eye />}
+                  </Button>
+                </div>
+              </Field>
+            </FieldGroup>
+          ) : null}
+          {error ? <FieldError id="login-error">{error}</FieldError> : null}
+          {verified ? (
+            <Button type="submit" disabled={pending}>
+              {pending ? '正在进入…' : '进入司南'}
+              <ArrowRight data-icon="inline-end" />
+            </Button>
+          ) : null}
         </form>
       </div>
     </main>

@@ -60,7 +60,7 @@ PIN 不写入环境变量、代码或业务表。详见 [Supabase 密码登录](
 
 上线前创建 Cloudflare Turnstile 站点，允许实际 Pages 域名；需要本地联调时另加入本地域名。在 Supabase Authentication 的 Bot and Abuse Protection 中开启 CAPTCHA，选择 Turnstile，将其 secret key 填入 Supabase。
 
-前端只填写 Turnstile site key。登录时客户端把验证 token 交给 Supabase；服务端 CAPTCHA 和 Auth 限流负责约束尝试次数。[Supabase CAPTCHA 配置](https://supabase.com/docs/guides/auth/auth-captcha)
+前端只填写 Turnstile site key。页面先完成验证，再显示 PIN 输入框；验证码过期后返回验证步骤，保留已填写的 PIN。登录时客户端把验证 token 交给 Supabase；服务端 CAPTCHA 和 Auth 限流负责约束尝试次数。[Supabase CAPTCHA 配置](https://supabase.com/docs/guides/auth/auth-captcha)
 
 ### 4. 填写本地配置
 

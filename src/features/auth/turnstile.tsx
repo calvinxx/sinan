@@ -50,6 +50,7 @@ export function Turnstile({
     let active = true
     let widget: string | undefined
     let api: TurnstileApi | undefined
+    onToken('')
     void loadTurnstile()
       .then((loaded) => {
         if (!active || !ref.current) return
@@ -59,13 +60,23 @@ export function Turnstile({
           theme: 'light',
           size: 'flexible',
           callback: (token: string) => {
+            if (!active) return
             setError('')
             onToken(token)
           },
-          'expired-callback': () => onToken(''),
-          'error-callback': () => {
+          'expired-callback': () => {
+            if (active) onToken('')
+          },
+          'timeout-callback': () => {
+            if (!active) return
             onToken('')
-            setError('验证未完成，请重试')
+            setError('验证已超时，请重试')
+          },
+          'error-callback': () => {
+            if (active) {
+              onToken('')
+              setError('验证未完成，请重试')
+            }
             return true
           },
         })
