@@ -302,7 +302,9 @@
 }
 /* Radix focuses tabs on pointer down, which also matches :focus-visible. */
 [data-slot='tabs-trigger'][data-pointer-focus]:focus-visible {
+  border-color: transparent;
   outline: none;
+  box-shadow: none;
 }
 .bookmark-tabs {
   gap: 12px;
